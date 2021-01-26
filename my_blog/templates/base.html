@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <!-- 整个项目的"基础模板"：所有网页都继承它 -->
+    <!--预留：网站标题title的位置-->
+    <title>{% block title %}{% endblock  %}</title>
+
+    <!-- jquery.js和popper.js，要在bootstrap.js前引入！！！-->
+    <!--引入：bootstrap.js依赖的"jquery.js"和"popper.js"-->
+    <script src="{% static 'jquery/jquery-3.5.1.js' %}"></script>
+    <!--popper.js采用：cdn远程引入,未下载到本地(因版本兼容问题)-->
+    <!--<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1-lts/dist/umd/popper.min.js"></script>-->
+    <script src="{% static 'popper/popper-1.14.4.js' %}"></script>
+    <!--引入：bootstrap的css文件-->
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <!--引入：bootstrap的js文件-->
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+
+    <!--引入：monokai.css文件(pygments的深色背景的代码高亮样式文件)-->
+    <link rel="stylesheet" href="{% static 'md_css/monokai.css' %}">
+
+    <!--引入：layer.js，"base中"增加这个"Layer组件",让所有页面都能使用弹窗提示功能！(它也依赖jquery.js，也要在其后引入)-->
+    <script src="{% static 'layer/layer.js' %}"></script>
+</head>
+
+<body>
+    <!--引入：导航栏-->
+    {% include 'header.html' %}
+
+    <!--新增：两个"div"容器，解决页脚取消"fixed-bottom"后，页脚沉底问题-->
+    <div id="wrapper">
+        <!--预留：具体页面的位置-->
+        {% block content %}{% endblock %}
+        <div id="push"></div>
+    </div>
+    <!--增加样式-->
+    <style>
+        /*控制页面：尺寸不小于屏幕的高度*/
+        html,body{
+            height:100%;
+            margin:0px;
+        }
+        /*容器：底部有个负边距，给页脚让出60px位置*/
+        #wrapper{
+            min-height:100%;
+            margin-bottom:-60px;
+        }
+        /*留出：一段与"页脚等高"的空隙，避免正文内容与页脚重叠*/
+        #footer,#push{
+            height:60px;
+        }
+    </style>
+
+    <!--引入：注脚-->
+    {% include 'footer.html' %}
+
+    <!--引入：回到顶部的"浮动按钮"-->
+    {% include "back_to_top_func.html" %}
+
+    <!--pygments的.css表格样式太难看了，博主在页面中用Jquery动态加载了Bootstrap的表格样式，像这样-->
+    <!--其实注释不写，也没啥影响！-->
+    <!--<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>-->
+    <!--<script>-->
+        <!--$('div#article_body table').addClass('table table-bordered');-->
+        <!--$('div#article_body thead').addClass('thead-light');-->
+    <!--</script>-->
+</body>
+</html>

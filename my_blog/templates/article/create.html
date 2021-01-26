@@ -1,0 +1,69 @@
+
+<!-- 继承"base.html"页 -->
+{% extends "base.html" %}
+{% load static %}
+
+
+<!-- 重写1：写入自己的title -->
+{% block title %}写文章{% endblock %}
+
+<!-- 重写2：写入自己的content -->
+{% block content %}
+<!-- 写文章表单 -->
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <br>
+            <!--提交文章的表单-->
+            <!--action="."/""：提交的地址，为默认的当前url"article_create"-->
+            <form method="post" action="." enctype="multipart/form-data">
+                <!--Django：POST数据的地方，必须有csrf_token验证-->
+                {% csrf_token %}
+
+                <!--文章"标题图"-->
+                <div class="form-group">
+                    <label for="avatar">标题图</label>
+                    <input type="file" class="form-control-file" name="avatar" id="avatar">
+                </div>
+
+                <!--文章标题-->
+                <div class="form-group">
+                    <label for="title">文章标题</label>
+                    <!--文本框：name=title，必须是fields=("title","body")里的-->
+                    <!--name=""：指定的控件提交数据的名称，必须与forms.py中的字段名对应-->
+                    <input type="text" class="form-control" id="title" name="title">
+                </div>
+
+                <!--新增：文章"栏目"-->
+                <div class="form-group">
+                    <label for="column">栏目</label>
+                    <select class="form-control col-3" id="column" name="column">
+                        <option value="none">请选择栏目..</option>
+                        <!--循环遍历：生成所有"栏目"选项-->
+                        {% for column in columns %}
+                            <option value="{{ column.id }}">{{ column }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!--新增：文章"标签"-->
+                <div class="form-group">
+                    <label for="tags">标签</label>
+                    <input type="text" class="form-control col-3" id="tags" name="tags">
+                </div>
+
+
+                <!--文章正文-->
+                <div class="form-group">
+                    <label for="body">文章正文</label>
+                    <!--文本域：name=body-->
+                    <textarea type="text" class="form-control" id="body" name="body" rows="12"></textarea>
+                </div>
+                <!--提交按钮-->
+                <button type="submit" class="btn btn-primary">完成</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

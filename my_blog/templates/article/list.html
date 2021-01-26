@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- extends：表明此页面，继承"base.html" -->
+    {% extends "base.html" %}
+    {% load static %}
+    <meta charset="UTF-8">
+    <!-- 重写1：写入"title" -->
+    {% block title %}首页{% endblock %}
+    <!--<title>文章</title>-->
+</head>
+
+<body>
+    <!-- 重写2：写入"content" -->
+    {% block content %}
+        <!--div容器：放置文章title-->
+        <div class="container">
+            <!-- 新增：按文章"热度"排序，breadcrumb：bootstrap中的面包屑导航样式！、"搜索"特定文章-->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'article:article_list' %}?search={{ search }}&column={{ column }}&tag={{ tag }}">最新</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'article:article_list' %}?order=total_views&search={{ search }}&column={{ column }}&tag={{ tag }}">最热</a>
+                    </li>
+                </ol>
+            </nav>
+
+            <!-- 新增："搜索栏"，搜索特定文章，以GET请求提交search参数；required属性阻止用户提交空白文本！ -->
+            <div class="row">
+                <div class="col-auto mr-auto">
+                    <form class="form-inline" method="get">
+                        <label class="sr-only">content</label>
+                        <input type="text" class="form-control mb-2 mr-sm-2" name="search" placeholder="搜索文章..." required>
+                    </form>
+                </div>
+            </div>
+            <!-- 搜索栏：提示语 -->
+            {% if search %}
+                {% if articleAll %}
+                    <h4><span style="color:red">"{{ search }}"</span>的搜索结果如下：</h4>
+                {% else %}
+                    <h4>暂无<span style="color:red">"{{ search }}"</span>有关的文章。</h4>
+                {% endif %}
+            {% endif %}
+
+            <!-- 文章列表循环：重写，按文章"栏目"分类 -->
+            <div class="row mt-2">
+                {% for article in articleAll %}
+
+                    <!--标题图-->
+                    {% if article.avatar %}
+                        <div class="col-3">
+                            <img src="{{ article.avatar.url }}" alt="avatar"
+                                 style="max-width:100%; border-radius:20px">
+                        </div>
+                    {% endif %}
+
+                    <!--文章内容-->
+                    <div class="col">
+                        <!--栏目：不同的栏目按钮、不同颜色(见bootstrap)-->
+                        {% if article.column %}
+                            <button type="button"
+                                    class="btn btn-sm mb-2
+                                        {% if article.column.title == 'Django' %}
+                                            btn-success
+                                        {% elif article.column.title == 'Java' %}
+                                            btn-danger
+                                        {% elif article.column.title == 'HTML' %}
+                                            btn-warning
+                                        {% elif article.column.title == '测试' %}
+                                            btn-info
+                                        {% endif %}">{{ article.column }}</button>
+                        {% endif %}
+                        <!--标签-->
+                        <span>
+                            {% for tag in article.tags.all %}
+                                <!--href:带tag参数,返回到view实现标签过滤，class中:是Bootstrap定义的徽章样式-->
+                                <a href="{% url 'article:article_list' %}?tag={{ tag }}" class="badge badge-secondary">{{ tag }}</a>
+                            {% endfor %}
+                        </span>
+                        <!--标题-->
+                        <h4>
+                            <b>
+                                <a href="{% url 'article:article_detail' article.id %}" style="color:black;">{{ article.title }}</a></b>
+                        </h4>
+                        <!--摘要-->
+                        <div>
+                            <!--"|slice:'100'"：Django的过滤器语法，即取正文的前100个字符显示。-->
+                            <p style="color:gray;">{{ article.body|slice:'100'|safe }}....</p>
+                        </div>
+                        <!--注脚-->
+                        <style>
+                            .img{
+                                /*vertical-align：设置元素的垂直对齐方式。该CSS属性定义行内元素的基线相对于该元素所在行的基线的垂直对齐。*/
+                                vertical-align:text-bottom;
+                            }
+                        </style>
+                        <P>
+                            <!--附加信息：增加了图标-->
+                            <span>
+                                <img src="{% static 'eye.svg' %}" width="18px" height="18px" class="img">
+                                {{ article.total_views }}&nbsp;&nbsp;&nbsp;
+                            </span>
+                            <span style="color:blue;">
+                                <img src="{% static 'comments.svg' %}" width="18px" height="18px" class="img">
+                                <!--修改为评论的计数-->
+                                {{ article.comments.count }}&nbsp;&nbsp;&nbsp;
+                            </span>
+                            <span>
+                                <img src="{% static 'clock.svg' %}" width="18" height="18" class="img">
+                                <!--旧代码：{{ article.created|date:'Y-m-d' }}-->
+                                {% load my_filters_and_tags %}
+                                {{ article.created|timesince_zh }}
+                            </span>
+
+                        </P>
+                        <!--<hr style="width:100%;">-->
+
+                    </div>
+                    <hr style="width:100%;">
+                {% endfor %}
+            </div>
+
+            <!-- 页码导航：完善"列表页"，文章做"分页"处理 -->  <!-- 新增：按文章"热度"排序 -->
+            <!-- 修改：页码href增加search参数 -->
+            <div class="pagination row">
+                <div class="m-auto">
+                    <span class="step-links">
+                        <!-- 分页原理：判断"当前页"所处的位置 -->
+                        <!--判断：若不是"第1页"，则显示"上翻"按钮-->
+                        {% if articleAll.has_previous %}
+                            <a href="?page=1&order={{ order }}&search={{ search }}&column={{ column }}&tag={{ tag }}" class="btn btn-success">&laquo; 1</a>
+                            <span>...</span>
+                            <a href="?page={{ articleAll.previous_page_number }}&order={{ order }}&search={{ search }}&column={{ column }}&tag={{ tag }}" class="btn btn-secondary">{{ articleAll.previous_page_number }}</a>
+                        {% endif %}
+                        <!--当前页面-->
+                        <span class="current btn btn-danger bnt-lg">{{ articleAll.number }}</span>
+                        <!--判断：若不是"最后页"，则显示"下翻"-->
+                        {% if articleAll.has_next %}
+                            <a href="?page={{ articleAll.next_page_number }}&order={{ order }}&search={{ search }}&column={{ column }}&{{ tag }}" class="btn btn-secondary">{{ articleAll.next_page_number }}</a>
+                            <span>...</span>
+                            <a href="?page={{ articleAll.paginator.num_pages }}&order={{ order }}&search={{ search }}&column={{ column }}&{{ tag }}" class="bnt btn-success">{{ articleAll.paginator.num_pages }} &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+</body>
+
+</html>

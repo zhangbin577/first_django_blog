@@ -1,0 +1,70 @@
+
+<!-- 为了二级评论：专门写了个/comment/repaly.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <title>二级评论回复</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+
+</head>
+<body>
+    <form action="." method="post" id="reply_form">
+        {% csrf_token %}
+        <div class="form-group">
+            <div id="test">
+                {{ comment_form.media }}
+                {{ comment_form.body }}
+            </div>
+        </div>
+    </form>
+    <!--回复："提交"按钮-->
+    <button onclick="confirm_submit({{ article_id }},{{ parent_comment_id }})" class="btn btn-primary">发送</button>
+
+    <!-- jquery.js和popper.js，要在bootstrap.js前引入！！！-->
+    <!--引入：bootstrap.js依赖的"jquery.js"和"popper.js"-->
+    <script src="{% static 'jquery/jquery-3.5.1.js' %}"></script>
+    <script src="{% static 'popper/popper-1.14.4.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+
+
+    <!--类似：表单提交的csrf token，"Ajax中"插入该"csrf.js"模块解决验证问题-->
+    <script src="{% static 'csrf.js' %}"></script>
+
+    <script>
+        $(function(){
+            //回复评论栏：编辑器"宽度自适应"，清除掉Ckeditor自身的style样式！
+            $(".django-ckeditor-widget").removeAttr("style");
+        });
+
+        function confirm_submit(article_id,comment_id){
+            //从ckeditor中取值
+            //CKEDITOR：编辑器提供的"全局变量"
+            //CKEDITOR.instances['id_body'].getData()：取得当前编辑器中，用户输入的"内容"。
+            let content = CKEDITOR.instances["id_body"].getData();
+            //调用ajax与后端交换数据
+            //Query的Ajax支持："$.ajax()"相较于"$.get/post"使用较麻烦，但能干的事很多！
+            $.ajax({
+                url:"/comment/post-comment/"+article_id+"/"+comment_id,
+                type:"POST",
+                data:{body:content},
+                //成功时"回调函数"
+                success:function(e){
+                    //if(e==="200 OK!"){
+                        //JS的window对象.loacation对象.reload()方法：父页面"重载"刷新！
+                        //parent.location.reload();
+
+                    if(e.code==="200 OK!"){
+                        //parent.location.reload();
+
+                        //新增：调用detail父页面的函数，实现2级评论，锚点定位问题 ——————detail.html里写好"该函数"即可！
+                        parent.post_reply_and_show_it(e.new_comment_id);
+                    }
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

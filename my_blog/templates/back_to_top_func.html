@@ -1,0 +1,68 @@
+
+<!--给文章"详情页"：增加1个回到顶部的"浮动按钮"，CSS的z-index属性设置元素的堆叠次序-->
+<button type="button" id="BackTop" class="toTop-arrow" style="z-index:100;"></button>
+
+<!--向上滚动的Jquery函数-->
+<script>
+
+    //页面加载完后：监听"2个"事件
+    $(function (){
+        // 事件1：点击按钮时，将页面滚到顶部，0.5s完成滚动动作
+        $("#BackTop").click(function (){
+            $("html,body").animate({scrollTop:0},500);
+        });
+        // 事件2：页面滚动时，根据页面距离顶部的距离(是否>300px)，决定按钮的"显示/隐藏"
+        $(window).scroll(function(){
+            //>300px：则以0.3s的特效"显示"按钮
+            if($(this).scrollTop()>300){
+                $("#BackTop").fadeIn(300);
+            }else{
+                //否则：先停止正在进行的特效，接着以0.3s的特效"隐藏"按钮
+                $("#BackTop").stop().fadeOut(300);
+            }
+        }).scroll();
+    });
+</script>
+
+<style>
+    /* 按钮边框的"大小、位置、样式"设置 */
+    /*rem：是CSS3新增的1个相对单位，用它为元素设定字体大小时，仍然是相对大小，但相对的只是HTML根元素。*/
+    .toTop-arrow{
+        width:3.5rem;   /*大小、内外边距、边框、边框圆角*/
+        height:3.5rem;
+        padding:0px;
+        margin:0px;
+        border:0px;
+        border-radius:33%;
+        opacity:0.7;       /*显示设置：透明度0.7*/
+        background:black;  /*背景"简写"*/
+        cursor:pointer;    /*光标显示："pointer"指针放上去显示"小手"！*/
+        position:fixed;    /*定位布局：固定定位*/
+        right:1.5rem;      /*偏移属性"右1.5，底1.5"*/
+        bottom:1.5rem;
+        display:none;      /*显示设置："none"元素隐藏，隐藏后"不占位"*/
+    }
+    /* 绘制：按钮中的"向上箭头"，运用"伪元素:before和:after",::before是CSS3中写法 */
+    .toTop-arrow::before, .toTop-arrow::after{
+        content:"";  /*不给为元素设置内容，仅作为容器，装"左右箭头"*/
+        width:31px;
+        height:7px;
+        border-radius:3px;
+        background:orange;
+        position:absolute;  /*定位布局：绝对定位*/
+
+    }
+    .toTop-arrow::before{
+        transform:rotate(-45deg) translate(0,-50%);  /*转换属性："rotate"旋转、"translate"平移*/
+        left:0.4rem;  /*偏移属性"左0.4rem"*/
+    }
+    .toTop-arrow::after{
+        transform:rotate(45deg) translate(0, -50%);
+        right:0.4rem; /*偏移属性"右0.4rem"*/
+    }
+    /* 取消点击按钮时的"聚焦" */
+    .toTop-arrow:focus{
+        outline:none; /*outline轮廓线：位于边框边缘的外围，起到突出元素的作用。*/
+    }
+</style>
+

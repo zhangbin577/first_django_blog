@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% extends "base.html" %}
+    {% load static %}
+    <meta charset="UTF-8">
+    {% block title %}登录{% endblock %}
+
+</head>
+
+<body>
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <br>
+                <!--注册入口：添加到此处即可-->
+                <p>用已有本地账号或<a href="{% url 'userprofile:register' %}">注册</a>新账号。也可通过第三方登录：</p>
+                <div class="socialaccount_ballot">
+                    <h5 class="mb-2 mt-4">第三方登录：</h5>
+                    <ul class="socialaccount_providers">
+                        {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+                    </ul>
+                    <h5 class="mb-2 mt-4">本地登录：</h5>
+                </div>
+
+                <!--登录(本地)：-->
+                <div class="col-6">
+                    <form method="post" action=".">
+                        {% csrf_token %}
+                        <!-- 账号 -->
+                        <div class="form-group">
+                            <label for="username">账号：</label>
+                            <!--name：指定的控件提交数据的名称，必须与登录forms.py中的fields字段名对应-->
+                            <input type="text" id="username" name="username" class="form-control" placeholder="请输入用户名/Email" autofocus="autofocus" required>
+                            <small class="form-text text-muted ml-1">
+                                还没有账号？<a href="{% url 'userprofile:register' %}" style="color:cornflowerblue;">注册新账号</a>
+                            </small>
+                        </div>
+                        <!-- 密码 -->
+                        <div class="form-group">
+                            <label for="password">密码：</label>
+                            <input type="password" name="password" id="password" class="form-control" placeholder="请输入密码" required>
+                            <small class="form-text text-muted ml-1">
+                                忘记密码？点击<a href="{% url 'password_reset_recover' %}">这里</a>重置密码
+                            </small>
+                        </div>
+                        <!-- 提交按钮 -->
+                        <button type="submit" class="btn btn-primary">确认</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+</body>
+</html>
